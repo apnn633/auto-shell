@@ -56,7 +56,7 @@ AI 驱动的 Shell 命令生成工具。架构：本地 Python Daemon（FastAPI�
 
 ```bash
 # 1. 克隆项目
-git clone https://github.com/yourname/auto-shell.git
+git clone https://github.com/cacaview/auto-shell.git
 cd auto-shell
 
 # 2. 安装依赖（推荐 conda 或 venv）
@@ -236,6 +236,148 @@ auto-shell/
 │   └── test_auto_shell.py      # 测试套件
 ├── config.yaml.example   # 配置模板
 └── pyproject.toml        # 项目依赖
+```
+
+---
+
+## HTTP API 接口
+
+Daemon 服务默认运行在 `http://127.0.0.1:28001`，提供以下接口：
+
+### 健康检查
+
+```
+GET /health
+```
+
+响应：
+```json
+{"status": "ok", "timestamp": "2024-01-01T12:00:00"}
+```
+
+### 获取配置
+
+```
+GET /config
+```
+
+响应：
+```json
+{
+  "llm_api_base": "https://api.openai.com",
+  "llm_model": "gpt-4o-mini",
+  "daemon_host": "127.0.0.1",
+  "daemon_port": 28001,
+  "agent_mode": "default",
+  "stream_output": false,
+  "smart_detect_mode": "regex"
+}
+```
+
+### 命令建议（同步）
+
+```
+POST /v1/suggest
+Content-Type: application/json
+
+{
+  "query": "查找大文件",
+  "cwd": "/home/user",
+  "os": "Linux",
+  "shell": "zsh"
+}
+```
+
+响应：
+```json
+{
+  "command": "find . -type f -size +100M",
+  "explanation": "查找当前目录下大于100MB的文件",
+  "is_dangerous": false,
+  "use_agent": false
+}
+```
+
+### 命令建议（流式 SSE）
+
+```
+POST /v1/suggest/stream
+Content-Type: application/json
+
+{
+  "query": "查找大文件",
+  "cwd": "/home/user",
+  "os": "Linux",
+  "shell": "zsh"
+}
+```
+
+响应（SSE 流）：
+```
+data: {"chunk": "find"}
+data: {"chunk": " . -type"}
+data: {"chunk": " f -size +100M"}
+data: [DONE]
+```
+
+### 启动 Agent 会话
+
+```
+POST /v1/agent/session/start
+Content-Type: application/json
+
+{
+  "task": "安装并配置 nginx",
+  "cwd": "/home/user",
+  "os": "Linux",
+  "shell": "zsh",
+  "mode": "default"
+}
+```
+
+响应：
+```json
+{
+  "session_id": "abc123",
+  "iteration": 1,
+  "action": "execute",
+  "command": "sudo apt update",
+  "is_dangerous": false,
+  "needs_confirmation": true
+}
+```
+
+### 推进 Agent 会话
+
+```
+POST /v1/agent/session/step
+Content-Type: application/json
+
+{
+  "session_id": "abc123",
+  "last_command": "sudo apt update",
+  "last_exit_code": 0
+}
+```
+
+### 删除 Agent 会话
+
+```
+DELETE /v1/agent/session/{session_id}
+```
+
+### 上报命令执行结果
+
+```
+POST /v1/command/result
+Content-Type: application/json
+
+{
+  "command": "ls -la",
+  "exit_code": 0,
+  "stdout": "file1.txt\nfile2.txt",
+  "stderr": ""
+}
 ```
 
 ---
