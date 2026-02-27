@@ -179,8 +179,12 @@ auto-shell-start
 |------|------|
 | **Ctrl + Alt + P** | 获取命令建议 / 推进 Agent 步骤 |
 | **Ctrl + A** | 循环切换主模式：`suggest` ↔ `agent` |
-| **Ctrl + X, Ctrl + A** | 循环切换 Agent 子模式 |
+| **Ctrl + X, Ctrl + A** | 循环切换 Agent 子模式：`default` → `auto` → `full_auto` |
 | **Esc** | 取消/清空当前建议 |
+
+主模式说明：
+- `suggest`: 普通模式，输入描述后获取单条命令
+- `agent`: Agent 模式，处理多步骤复杂任务
 
 ---
 
@@ -191,6 +195,15 @@ auto-shell-start
 | `default` | 每步都放入缓冲区等待用户确认 | 全部 |
 | `auto` | AI 自动判断安全性 | 仅高危命令 |
 | `full_auto` | 无拦截，全部自动执行（⚠️ 慎用） | 无 |
+
+切换方式：
+```zsh
+auto-shell-mode agent        # 主模式切换到 agent
+auto-shell-mode auto         # Agent 子模式切换到 auto
+auto-shell-mode full_auto    # Agent 子模式切换到 full_auto
+auto-shell-mode status       # 查看当前状态
+auto-shell-mode stop         # 停止当前 Agent 会话
+```
 
 ---
 
