@@ -60,27 +60,103 @@ AI 驱动的 Shell 命令生成工具。架构：本地 Python Daemon（FastAPI�
 2. 下载最新版本的 `auto_shell-*.whl` 或 `auto-shell-*.tar.gz`
 3. 安装：
 ```bash
-pip install auto_shell-0.1.0-py3-none-any.whl
+pip install auto_shell-1.0.0-py3-none-any.whl
 # 或
-pip install auto-shell-0.1.0.tar.gz
+pip install auto-shell-1.0.0.tar.gz
 ```
 
 ### 方式二：从源码安装
 
 ```bash
-# 1. 克隆项目
 git clone https://github.com/cacaview/auto-shell.git
 cd auto-shell
-
-# 2. 安装依赖
 pip install -e .
-
-# 3. 复制并编辑配置
-cp config.yaml.example config.yaml
-# 编辑 config.yaml，填入你的 LLM API 配置
 ```
 
-### 加载 Zsh 插件
+---
+
+## 快速开始
+
+### 1. 初始化配置
+
+安装后首次运行会自动创建配置文件：
+
+```bash
+# 查看插件安装路径
+pip show auto-shell | grep Location
+
+# 初始化配置文件到 ~/.config/auto-shell/
+auto-shell init
+```
+
+或者手动创建配置文件：
+
+```bash
+mkdir -p ~/.config/auto-shell
+cat > ~/.config/auto-shell/config.yaml << 'EOF'
+llm:
+  api_base: "https://api.deepseek.com"
+  api_key: "sk-your-api-key"
+  model: "deepseek-chat"
+  temperature: 0.1
+  max_tokens: 200
+
+daemon:
+  host: "127.0.0.1"
+  port: 28001
+
+shell:
+  stream_output: false
+  smart_detect_mode: "regex"
+EOF
+```
+
+### 2. 加载 Zsh 插件
+
+找到插件路径并添加到 `~/.zshrc`：
+
+```bash
+# 查看插件路径
+AUTO_SHELL_PATH=$(pip show auto-shell | grep Location | cut -d' ' -f2)
+echo "插件路径: $AUTO_SHELL_PATH/auto_shell"
+
+# 添加到 ~/.zshrc
+echo 'source '"$AUTO_SHELL_PATH"'/auto_shell/plugin/auto-shell.plugin.zsh' >> ~/.zshrc
+source ~/.zshrc
+```
+
+### 3. 启动 Daemon
+
+```zsh
+# 启动后台服务
+auto-shell-start
+
+# 检查状态
+auto-shell-status
+```
+
+### 4. 使用
+
+在终端输入自然语言，按 **Ctrl+Alt+P** 获取命令：
+
+```
+~ % 查找大文件<Ctrl+Alt+P>
+→ find . -type f -size +100M
+```
+
+---
+
+## 配置文件位置
+
+auto-shell 按以下顺序查找配置文件：
+
+1. 环境变量 `AUTO_SHELL_CONFIG` 指定的路径
+2. 当前目录的 `config.yaml`
+3. `~/.config/auto-shell/config.yaml`
+4. `~/.auto-shell/config.yaml`
+5. `/etc/auto-shell/config.yaml`
+
+### 配置示例
 
 **方式一：直接 source（临时，适合测试）**
 ```zsh

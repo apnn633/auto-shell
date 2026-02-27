@@ -5,6 +5,8 @@
 import argparse
 import asyncio
 import logging
+import os
+from pathlib import Path
 from typing import Optional
 
 from .config import get_config, reload_config
@@ -13,6 +15,52 @@ from .llm_client import get_llm_client
 from .agent import Agent, AgentMode
 
 logger = logging.getLogger("auto-shell")
+
+
+# 默认配置模板
+DEFAULT_CONFIG = """# auto-shell 配置文件
+
+llm:
+  api_base: "https://api.openai.com/v1"
+  api_key: "sk-your-api-key"
+  model: "gpt-4o-mini"
+  temperature: 0.1
+  max_tokens: 200
+
+daemon:
+  host: "127.0.0.1"
+  port: 28001
+  log_level: "info"
+
+agent:
+  default_mode: "default"
+  max_iterations: 10
+  safe_commands:
+    - "^ls"
+    - "^cat"
+    - "^echo"
+    - "^pwd"
+    - "^which"
+    - "^grep"
+    - "^find"
+    - "^head"
+    - "^tail"
+    - "^wc"
+  dangerous_commands:
+    - "^rm"
+    - "^sudo"
+    - "^chmod"
+    - "^chown"
+    - "^mkfs"
+    - "^dd"
+    - "^>"
+    - "^>>"
+
+shell:
+  request_timeout: 30
+  stream_output: false
+  smart_detect_mode: "regex"
+"""
 
 
 def setup_logging(level: str = "info"):
@@ -125,6 +173,30 @@ def cmd_config(args):
     print(f"   最大迭代次数: {config.agent.max_iterations}")
 
 
+def cmd_init(args):
+    """初始化配置文件"""
+    config_dir = Path.home() / ".config" / "auto-shell"
+    config_file = config_dir / "config.yaml"
+    
+    if config_file.exists() and not args.force:
+        print(f"⚠️  配置文件已存在: {config_file}")
+        print("   使用 --force 覆盖")
+        return
+    
+    config_dir.mkdir(parents=True, exist_ok=True)
+    config_file.write_text(DEFAULT_CONFIG)
+    
+    print(f"✅ 配置文件已创建: {config_file}")
+    print()
+    print("📝 请编辑配置文件，填入你的 API 密钥：")
+    print(f"   vim {config_file}")
+    print()
+    print("   需要修改的配置：")
+    print("   - llm.api_base: API 地址")
+    print("   - llm.api_key: API 密钥")
+    print("   - llm.model: 模型名称")
+
+
 def cmd_test(args):
     """运行测试"""
     setup_logging(args.log_level)
@@ -167,6 +239,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例:
+  auto-shell init                     # 初始化配置文件
   auto-shell start                    # 启动 Daemon
   auto-shell start --port 8080        # 指定端口启动
   auto-shell suggest "查找大文件"      # 测试命令建议
@@ -184,6 +257,11 @@ def main():
     )
     
     subparsers = parser.add_subparsers(dest="command", help="可用命令")
+    
+    # init 命令
+    init_parser = subparsers.add_parser("init", help="初始化配置文件")
+    init_parser.add_argument("--force", "-f", action="store_true", help="强制覆盖已有配置")
+    init_parser.set_defaults(func=cmd_init)
     
     # start 命令
     start_parser = subparsers.add_parser("start", help="启动 Daemon 服务")
