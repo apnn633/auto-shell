@@ -1,0 +1,64 @@
+# auto-shell 配置文件示例
+# 复制此文件为 config.yaml 并填入你的 API 密钥
+
+# LLM API 配置
+llm:
+  # API 基础地址 (支持 OpenAI 兼容的 API)
+  api_base: "https://api.openai.com"
+  # API 密钥 (请替换为你自己的密钥)
+  api_key: "sk-your-api-key-here"
+  # 模型名称
+  model: "gpt-4o-mini"
+  # 温度参数 (越低越确定)
+  temperature: 0.1
+  # 最大 token 数
+  max_tokens: 500
+
+# Daemon 配置
+daemon:
+  # 监听地址
+  host: "127.0.0.1"
+  # 监听端口
+  port: 28001
+  # 日志级别
+  log_level: "info"
+
+# Agent 模式配置
+agent:
+  # 默认模式: default, auto, full_auto
+  default_mode: "default"
+  # 最大迭代次数
+  max_iterations: 10
+  # 允许自动执行的命令白名单 (正则表达式)
+  safe_commands:
+    - "^ls"
+    - "^cat"
+    - "^echo"
+    - "^pwd"
+    - "^which"
+    - "^grep"
+    - "^find"
+    - "^head"
+    - "^tail"
+    - "^wc"
+  # 高危命令黑名单 (需要用户确认)
+  dangerous_commands:
+    - "^rm"
+    - "^sudo"
+    - "^chmod"
+    - "^chown"
+    - "^mkfs"
+    - "^dd"
+    - "^>"
+    - "^>>"
+
+# Shell 插件配置
+shell:
+  # 请求超时时间 (秒)
+  request_timeout: 30
+  # 是否启用流式输出 (true: 实时显示, false: 等待完成后显示)
+  stream_output: false
+  # 智能检测模式: regex (正则检测), ai (AI 判断)
+  # regex: 使用正则表达式检测输出是否为解释性文字
+  # ai: 让 AI 自己标记输出类型 (需要在 prompt 中要求 AI 返回 type 字段)
+  smart_detect_mode: "regex"

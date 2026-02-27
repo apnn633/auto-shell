@@ -1,0 +1,28 @@
+TODO.md
+auto_shell/__pycache__/
+daemon/__pycache__/
+tests/__pycache__/
+
+# 配置文件（包含敏感信息）
+config.yaml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 日志
+*.log
+
+# 系统文件
+.DS_Store
+Thumbs.db
