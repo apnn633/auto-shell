@@ -54,16 +54,30 @@ AI 驱动的 Shell 命令生成工具。架构：本地 Python Daemon（FastAPI�
 
 ## 安装
 
+### 方式一：从 GitHub Release 安装（推荐）
+
+1. 前往 [Releases](https://github.com/cacaview/auto-shell/releases) 页面
+2. 下载最新版本的 `auto_shell-*.whl` 或 `auto-shell-*.tar.gz`
+3. 安装：
+```bash
+pip install auto_shell-0.1.0-py3-none-any.whl
+# 或
+pip install auto-shell-0.1.0.tar.gz
+```
+
+### 方式二：从源码安装
+
 ```bash
 # 1. 克隆项目
 git clone https://github.com/cacaview/auto-shell.git
 cd auto-shell
 
-# 2. 安装依赖（推荐 conda 或 venv）
+# 2. 安装依赖
 pip install -e .
 
 # 3. 复制并编辑配置
 cp config.yaml.example config.yaml
+# 编辑 config.yaml，填入你的 LLM API 配置
 ```
 
 ### 加载 Zsh 插件
